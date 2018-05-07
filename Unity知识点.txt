@@ -1,0 +1,497 @@
+一、什么是协同程序?
+	在主线程运行同时开启另一段逻辑处理,来协助当前程序的执行.换句话说
+	开启协程就是开启一个可以与程序并行的逻辑.可以用来控制运动,序列以
+	及对象的行为。Unity的协程是在每帧结束后去检测yield的条件是否满足
+	拓展: 进程 线程 协程的区别
+	1、进程
+	进程是具有一定独立功能的程序关于某个数据集合上的一次运行活动，系统
+	进行资源分配和调度的一个独立单位。每个进程都有自己的独立内存空间，
+	不同的进程间通过进程间通信来通信。由于进程比较重量，占据独立的内存，
+	所以上下文进程间的开销（栈、寄存器、虚拟内存、文件句柄等）比较大，但是
+	相对比较稳定安全
+	2、线程
+	线程是进程的一个实体，是CPU调度和分派的基本单位，它是比进程更小的能独立
+	运行的基本单位，线程自己基本上不拥有系统资源，只拥有宜点运行中必不可少的
+	资源（程序计数器，一组寄存器和栈），但是它可与同属一个进程的其他的线程
+	共享进程所拥有的全部资源。线程间通信主要通过共享内存，上下文切换很快，资源
+	开销较少，但相比进程不够稳定容易丢失数据
+	3、协程
+	协程是一种用户态的轻量级的线程，协程的调度完全由用户控制。协程拥有自己的寄存器
+	上下文和栈。协程调度切换时，将寄存器上下文和栈保存到其他地方，在切回来的时候，恢复
+	保存的寄存器上下文和栈，直接操作栈则基本灭有内核切换的开销，可以不加锁的访问全局变量
+	所以上下文的切换非常快
+
+二、Unity3d中碰撞器和触发器的区别
+	碰撞器是触发器的载体，而触发器知识碰撞器身上的一个属性
+	当Is Trigger =false 时，碰撞器根据物理引擎触发碰撞，产生碰撞的效果，可以调用
+	OnCollisionEnter/Stay/Exit函数
+	当Is Trigger= true时，碰撞器被物理引擎所忽略，没有碰撞效果，可以调用
+	OnTriggerEnter/Stay/Exit函数
+	如果既要检测到物体的触碰又不想让碰撞检测影响物体的移动或要检测一个物体是否经过
+	空间的某个区域这是就要使用触发器
+	
+三、物体发生碰撞的必要条件
+	两个物体都必须带有碰撞器Collider,其中一个物体还必须带有Rigidbody刚体，（注意）必须是
+	运动的物体带有Rigidbody脚本才能检测到碰撞
+	
+四、简述ArrayList和list的主要区别
+	ArrayList存在不安全类型（ArrayList会把所有的插入其中的数据都当作Object来处理）
+	装箱拆箱操作（费时）List是接口，ArrayList是一个实现了该接口的类，可以被实例化
+	
+五、简述GC(垃圾回收)产生的原因，并描述如何避免
+	GC回收堆上的内存
+	避免：
+	介绍new产生对象对的次数
+	使用公共的对象（静态成员）
+	将String换成StringBuilder
+
+六、反射的实现原理
+	审查元数据并收集关于它的类型信息的能力
+	实现步骤：
+	导入using System.Reflection;
+	Assembly.Load("程序集")；加载程序集，返回类型是一个Assembly
+	得到程序集中所有类的名称
+	foreach(Type type in assembly.GetTypes()){
+		string t= type.Name;
+	}
+	Type type=assembly.GetType("程序集.类型");//获取当前类的类型
+	Activator.CreateInstance(type);//创建此类的
+	MethodInfo mInfo=type.GetMethod("方法名");//获取当前的方法
+	mInfo.Invoke(null,方法参数)
+
+七：简述四元数Quaternion的作用，四元数对欧拉角的优点？
+	四元数表示选装
+	相对欧拉角的优点：
+	能进行增量旋转
+	避免万向锁
+	给定的方位的表达式有两种，互为负（欧拉角有无数中表达方式）
+	万向锁的知识：
+	......
+	
+八：平面知识
+	平面方程公式： ax+by+cz+d=0;
+	其中平面的法向量 （a,b,c）
+    假设有两个平面 a1x+b1y+c1z+d=0;
+	               a2x+b3y+c3z+d=0;
+	如果求两个平面的相交的直线的方向向量：就是求两个平面的法相量的外积
+	如果判断两个平面的是否相交，求两个平面法向量的夹角
+	
+九、如何安全的在不同工程间安全的迁移asset数据？三种方法
+	1.将Assets目录迁移
+	2.导出包，export Package
+	3.用unity自带的assets Server功能
+
+十、MeshRender中material和sharedmaterial的区别
+	修改sharedMaterial将改变所有物体使用这个材质的外观，并且也改变存储在工程里的材
+	质设置,material则不会，但是sharedMaterial的效率更高，它是共享材质，无论如何操作材质的属性（如更
+	换颜色或者更换shader)，内存中只会占用一份，但是如果要用material的话，每次更换属性的时候
+	Unity就会自动new一份新的material作用于它，直到Application.LoadLevel()或者Resources.UnloadUnusedAssets()
+	的时候才会释放内存，所以material就有可能会造成内存泄漏
+
+十一、Unity提供了几种光源，分别是什么
+	四种
+	平行光：Direction Ligth
+	点光源：Point Light
+	聚光灯：Spot Light
+	区域光源：Area Light 
+
+十二、简述一下对象池，你觉得在FPS里哪些东西适合使用对象池
+	对象池就是存放需要反复调用资源的一个空间，当一个对象会大量生成的时候如果每次都销毁创建会很费时间，
+	通过对象池把暂时不用的对象放到一个池中(也就是一个集合中)，当下次要重新生成这个对象的时候去池子中查找
+	一下是否有可用的对象，如果有的话，就直接拿出来使用，不需要再创建，如果池中没有可用对象，才需要重新创建
+	利用空间换时间达到游戏的高速运行效果，在FPS游戏中要常被大量复制的的对象子弹，敌人，粒子等
+
+十三、CharacterController和Rigidbody的区别
+	Rigidbody具有完全真实的物理特性，Unity中物理系统最基本的一个组件，包含了常用的物理特性，而
+	CharacterController可以说是受限的Rigidbody,具有一定的物理效果但不是完全真实，是Unity为了使开发者
+	能方便的开发第一人称视角的游戏而封装的一个组件
+
+十四、简述Prefab的作用
+	在游戏运行时实例化，Prefab相当于一个模板，对你已经有的素材，脚本，参数做一个默认的配置，以便于以后的修改
+	同时Prefab打包的内容简化了导出的操作，便于团队的交流
+	
+十五、请简述sealed关键字用在类声明时于函数声明时的作用
+	sealed修饰的类为密封类，类声明时防止其他类继承此类，在方法中声明可防止派生类重写此方法
+
+十六、请简述private,public,protected,internal的区别
+	public：对任何类和成员都公开，无限制访问
+	private:仅对该类公开
+	protected：对该类和其派生类公开
+	internal:只能在包含该类的程序集中访问该类
+
+十七、使用Unity3d实现2d游戏，有几种方式？
+	1.使用本身GUI,在Unity4.6以后出现的UGUI
+	2.把摄像机的Projection(投影)值调为Orthographic(正交投影)，不考虑z轴
+	3.使用2d插件，如：2DToolKit,和NGUI
+
+十八、在物体发生碰撞的整个过程中，有几个阶段，分别列出对应的函数
+	三个阶段：1.OnCollisionEnter/Stay/Exit
+	
+十九、Unity3d的物理引擎中，有几种施加力的方式，分别描述出来
+	rigidbody.AddForce/AddForceAtPosition都在rigidbody系列函数中
+	
+二十、什么叫链条关节(固定关节)
+	Hinge Joint 可以模拟两个物体间用一根链条连接在一起的情况，能保持两个物体在一个固定的距离内部移动
+	不产生作用力，但是达到固定距离后就会产生作用力
+
+二十一、物体自身旋转使用的函数？
+	Transform.Rotate()
+
+二十二、Unity3d提供一个用于保存和读取数据的类PlayerPrefs,请列出保存和读取整形数据的函数
+	PlayerPrefs.SetInt() PlayerPrefs.GetInt()
+
+二十三、Unity3d脚本从唤醒到销毁有着一套比较完整的声明周期，请列出系统自带的几个重要的方法
+	Awake--->OnEnable--->Start--->FixedUpdate--->Update--->LateUpdate--->OnGUI--->OnDisable
+	--->OnDestroy
+	
+二十四、物理更新一般放在那个系统函数里
+	FixedUpdate,每固定帧绘制时执行一次,因此每次调用的时间间隔是相等的。和FixedUpdate不同的是Udpate是渲染帧执行，如果你的渲染效率
+	低下的时候Update调用次数就会跟着下降。因此物理更新更应该放在FixedUpdate函数中，这样物理表现将不受渲染的影响，
+	表现也将更加顺滑，而Update比较适合做控制普通动画表现，处理逻辑等
+
+二十五、在场景中放置多个Camera并同时处于活动状态会发生什么？
+	游戏界面可以看到很多个摄像机的混合。
+	
+二十六、如何销毁一个UnityEngine.Object及其子类
+	使用Destroy()方法
+
+二十七、请描述Unity3d中会发生在组件出现数据丢失情况
+	一般是组件上绑定的物体对象被删除了
+
+二十八、LOD是什么，优缺点是什么？
+	LOD(Level of detail)多层细节，是最常用的游戏优化技术。它按照模型的位置和重要程度决定物体渲染的资源分配
+	降低非重要物体的面数和细节度，从而获得高效率的渲染算法，缺点是增加了内存
+	详情解释：http://blog.csdn.net/yuxikuo_1/article/details/48795325
+
+二十九、MipMap是什么，作用？
+	MipMapping:在三维计算机图形的贴图渲染中有常用的技术，为加快渲染进度和减少图象锯齿，贴图被处理成由一系列
+	被预先计算和优化过的图片组成的文件，这样的贴图被称为MipMap。
+	拓展：
+	MipMapping 技术有点类似LOD技术，但是不同的是，LOD技术针对的模型资源，而Mipmap针对的是贴图资源
+	使用MipMap后，贴图会根据摄像机距离远近，选择使用不同精度的贴图。
+	缺点：会占用内存，因为mipmap会根据摄像机远近不同而生成对应的八个贴图，所以必然占内存
+	优点：会优化显存带宽，用来减少渲染，因为可以根据实际情况，会选择合适的贴图来渲染，距离摄像机越远，显示的贴图像素
+	越低
+	
+	MipMap可以用户跑酷类游戏，当角色靠近时，贴图清晰显示，否则模糊显示
+	如果我们使用的贴图不需要这样的效果的话，就一定要把Generate Mip Maps 选项和Read/Write Enabled 选项取消勾选！
+	因为Mipmap会十分占用内存，MipMap会让你的包占更大的容量!
+	
+三十、请描述Interface与抽象类之间的不同
+	抽象类表示该类中可能已经有一些方法的具体定义，但接口就死仅仅只能定义各个方法界面，不能具体的实现
+	代码在成员方法中。抽象类是子类用来继承的，当父类已经有实际功能的方法时该方法在子类中可以不必实现
+	直接引用父类的方法，子类也可以重写该父类的方法，实现接口的时候必须要实现接口中的所有方法，不能遗漏一个
+	
+三十一、.Net与Mono的关系
+	mono是.net的一个开源平台工具，就类似java的虚拟机，java本身不是跨平台语言，但运行在虚拟机上就能
+	实现跨平台。.net 只能运行在windows下，mono可以实现跨平台跑，可以运行在linux,Unix，MaxOS等
+
+三十二、简述Unity3D支持作为脚本的语言的名称
+	Unity脚本语言给予Mono的.net 平台上运行，可以使用.net 库，这也为XML、数据库、正则表达式等问题提供了
+	很好的解决方案。Unity里的脚本都会经过编译，他们的运行速度也很快，这三种语言实际上的功能和运行的速度是一样的，
+	区别主要体现在语言特性上。JavaScript C# BOO
+	
+三十三、U3D中用于记录节点空间集合信息的组件名称，及其父类名称
+	Transform 父类是Component
+
+三十四、向量的点乘法、叉乘以及归一化的意义？
+	1.点乘描述了两个向量的相识成都，结果越大向量越相似，还可表示投影
+	2.叉乘得到的向量垂直于原来的两个向量
+	3.归一化向量：用在只关心方向，不关心大小的时候
+
+三十五、为何大家都在移动设别上寻求U3D原生GUI的替代方案
+	不美观，OnGUI很耗费时间，效率不高，使用不方便
+
+三十六、请简述如何在不同的分辨率下保持UI的一直性
+	NGUI：很好的解决了这一点，屏幕分辨率的自适应性，
+	原理就是计算出屏幕的宽高比跟原来的预设的屏幕分
+	辨率求出一个对比值，然后修改摄像机的size。
+	UGUI：通过锚点和中心点和分辨率也解决这个问题
+
+三十七、什么是LightMap？
+	LightMap:就是指在三维软件里事先打好关，然后渲染场景各个表面的光输出到贴图上，最后又通过引擎贴到
+	场景中，这样就使物体有了光照的感觉
+	优点：避免引擎实时渲染计算光照提升渲染速度
+	缺点：增加内存
+
+
+三十八、Unity和cocos2d的区别
+	1. Unity3D支持C#、javascript等，cocos2d-x 支持c++、Html5、Lua等。
+	2. cocos2d 开源 并且免费
+	3. Unity3D支持iOS、Android、Flash、Windows、Mac、Wii等平台的游戏开发，cocos2d-x支持iOS、Android、WP等。
+	
+三十九、C#和C++的区别？
+
+	简单的说：C# 与C++ 比较的话，最重要的特性就是C# 是一种完全面向对象的语言，而C++ 不是，
+	另外C# 是基于IL 中间语言和.NET Framework CLR 的，在可移植性，可维护性和强壮性都比C++ 有很大的改进。
+	C# 的设计目标是用来开发快速稳定可扩展的应用程序，当然也可以通过Interop 和Pinvoke 完成一些底层操作。
+	更详细的区别大家可以参考这里
+	
+四十、结构体和类有何区别？
+	1、结构体是值类型，类是引用类型.
+	2、结构体不能带有无参的构造函数，但是类可以。
+	3、结构体不可以实现类似于类的继承，但是可以继承接口
+	4、当类的传递对象修改时，将同时修改源对象，而结构体的传递对象修改时，不会对源对象产生影响
+
+四十一、ref参数和out参数是什么？有什么区别？
+	ref和out参数的效果一样，都是通过关键字找到定义在主函数里面的变量的内存地址，并通过方法体内的
+	语法改变它的大小。不同点是就是输出参数必须对参数进行初始化。ref必须初始化，out参数必须在函数
+	里复制。ref参数是引用，out参数为输出参数
+	拓展：
+	C#中方法参数传递有四种类型：传值（by value）、传址（by reference）、输出参数（byoutput）
+	数组参数（by array）。传值参数无需额外的修饰符，传址参数需要修饰符ref,输出参数需要修饰符out,
+	数组参数需要修饰符params.
+
+四十二、C#的委托是什么？有何用处？
+	委托类似于一种安全的指针引用，在使用它时是当做类来看待而不是一个方法，相当于对一组方法的列表
+	的引用。用处：使用委托使程序员可以将方法引用封装在委托对象内，然后可以将该魏国传递给调用所引用方法的代码，而不必
+	在编译时知道将调用那个方法。与C或者C++中函数指针不同，委托是面向对象，而且是类型安全的。
+
+四十三、C#中的排序方式有哪些？
+	选择排序、冒泡排序、快速排序、插入排序、希尔排序、归并排序
+	
+四十四：射线的检测碰撞物体的原理是？
+	射线是3D世界中一个点向一个方向发射的一条无终点的线，在发射轨迹中与其他物体发生碰撞时，它将停止发射
+	拓展：
+	Ray射线类和RaycastHit射线投射碰撞信息类是最常用的射线工具类
+	创建一条射线Ray需要指明射线的起点(origin)和射线的方向(direction),这两个参数也是Ray的成员变量
+	注意:射线的方向在设置的时候如果未单位化,Unity3D回自动进行单位的归一化处理,向量的归一化在前面已经提到过
+	public Ray(Vector3 origin,Vector3 direction) 
+	RaycastHit 类用于存储发射射线后产生的碰撞信息 常用的成员变量如下:
+	collider 与射线发生碰撞的碰撞器
+	distance 从射线起点到射线与碰撞器的交点距离
+	normal 	 射线射入平面的法向量
+	point    射线与碰撞器交点的坐标(Vector3对象)
+	
+	Physics.Raycast 静态函数用于场景中发射一条可以和碰撞器碰撞的射线,相关的API如下:
+	public static bool Raycast(Vector3 origin,Vector3 direction,float distance=Mathf.Infinity,intlayerMask=DefaultRaycastLayers);
+    参数说明:
+	origin    射线起点世界坐标
+	direction 射线方向矢量
+	distance  射线长度(起点到终点的距离),默认设置为无限长
+	layerMask 显示层掩码(只选择层次为layerMask指定层次的碰撞器进行碰撞,其他层次的碰撞器忽略)
+	返回值说明:
+	当射线与碰撞器发生碰撞时返回值为true,未穿过任何碰撞器时返回为false
+	
+	重载函数1:
+	public static bool Raycast (Vector3 origin,Vector3 direction,RaycastHit hitInfo,float distance 
+	=Mathf.Infinity,int layerMask=DefaultRaycastLayers);
+	这个重载函数使用已有的一条射线Ray来作参数
+
+	重载函数2:
+	public static bool Raycast (Ray ray,RaycastHit hitInfo,float distance=Mathf.Infinity,intlayerMask=
+	DefaultRaycastLayers);
+	这个重载函数使用已有的射线Ray来作为参数并获得碰撞信息RaycastHit.
+	在调试时如果想显示一条射线,可以使用Debug.DrawLine来实现
+	public static void DrawLine(Vector3 start,Vector3 end,Color color);
+	注意:只有当发生碰撞的时候,在Scene视图中才能看到画出的射线
+	
+	*发射射线返回所有的碰撞信息
+	使用二次射线发射方式,我们处理的目标往往是内层物体,如果我们想要同时处理射线方向上的所有物体的碰撞物体
+	就要使用RaycastAll这个API函数
+	public static RaycastHit[]RaycastAll(Ray ray,float distance=Mathf.Infinity,intlayerMask=DefaultRaycastLayers);
+	
+	public static RaycastHit[] RaycastAll(Vector3 origin,Vector3 direction ,float distance=Mathf.Infinity,
+	int layermasl=DefaultRaycastLayers);
+	返回的是一个成员类型RaycastHit的数组,记录了在射线方向上碰撞的所有物体信息
+
+	
+四十五、Unity中，照相机的Clipping Planes的作用是什么？调整Near、Fare两个值时候，应该注意什么？
+	剪裁平面。从相机到开始渲染和停止渲染之间的距离。
+
+四十六、如何让已经存在的GameObject在LoadLevel后不被销毁掉
+	DontDestroyOnLoad(transform.gameObject);
+
+四十七、请简述GC(垃圾回收产生的原因)，并描述如何避免？
+	GC回收堆上的内存
+	避免：1.减少new产生的对象次数
+		  2.使用公用的对象（静态对象）	
+		  3.将String换成StringBuilder 
+
+四十八、移动相机动作在哪个函数里，为什么在这个函数里？
+	LateUpdate 是在所有的update结束后才调用，比较适合用于命令脚本的执行。官网上例子是摄像机的跟随，都是
+	所有update操作完才进行摄像机的跟进，不然就可能出现摄像机已经推进，但是视角还未有校色的空帧出现。
+
+四十九、GPU的工作原理
+	简而言之，GPU的图形处理流水线如下的工作：（并不一定按照如下顺序）
+	顶点处理：这个阶段GPU读取描述3d图形外观的顶点数据并根据顶点数据确定图形的形状以及位置的关系，建立器3D图形的骨架。在支持DX8和DX9
+	规格的GPU中这些工作由硬件实现VertexShader(定点着色器)完成。
+	光栅化计算：显示器实际实现的图象是由像素组成的，我们需要将上面生成的图形上的点，和线通过一定的算法转换到相应的像素点。纹理贴图：
+	顶点单元生成的多变形只构成了3D物体的轮廓，而纹理映射（texture mapping）工作完成对多变行表面对的贴图，通俗的说，就是
+	将多边形的表面贴上相应的图片，从而生成“真实”的图形，TMU(Texture mapping unit)即是用来完成此项工作。
+	像素处理：这个阶段（在对每个像素进行光栅处理期间）GPU完成对像素的计算和处理，从而确定每个像素的最终属性。在
+	支持DX8和DX9的GPU中，这些工作由硬件实现Pixel Shader(像素着色器)完成。最终输出：ROP(光栅引擎化)最终完成像素的输出
+
+五十、什么是渲染管道？
+	是指在显示器上为了显示出图象而经过一系列表操作，渲染管道中的很多步骤，都要将集合物体从一个坐标系
+	变换到另一个坐标系中去。
+	本地坐标-->视图坐标-->背图裁剪-->光照-->裁剪-->投影-->视图变换-->光栅化
+
+五十一、如何优化内存？
+	有很多种方式,例如
+	1.压缩自带类库
+	2.将暂时不用的以后还需要用的物体隐藏起来而不是直接Destroy掉
+	3.释放AssetBundle占用的资源
+	4.降低模型的片面数，降低模型的骨骼数量，降低贴图的大小
+	5.使用光照贴图，使用多层次细节(LOD),使用着色器(Shader)，使用预设(Prefab)
+	6.减少代码中产生的临时变量
+
+五十二、动态加载资源的方式？他们之间的区别
+	1.Resources.Load();
+	2.AssetBundle
+	//参考：http://www.ceeger.com/forum/read.php?tid=4394
+
+五十三、请描述游戏动画有哪集中,以及其原理
+	1.主要有关节动画,骨骼动画,单一网格模型动画(关键帧动画)
+	关节动画:把角色分成若干独立部分,一个部分对应一个网格模型,部分的动画连接成一个整体的动画,
+	角色比较灵活,Quake2中使用这种动画;
+    骨骼动画.广泛应用的动画方式,集成了以上两种方式的优点,骨骼按角色特点组成一定层次的结构,有关节相连
+	可做相对运动,皮肤作为单一的网格蒙在骨骼之外,决定角色的外观;
+	单一网格模型动画由一个完整的网格模型构成,在动画序列的关键帧里记录各个顶点的原位置及其改变量,然后插值运算
+	实现动画效果,角色动画比较真实
+
+五十四、alpha blend 工作原理
+	Alpha Blend 实现透明效果,不过只能针对模块区域进行alpha操作,透明度可设
+
+五十五、写出关照计算中的diffuse的计算公式
+	diffuse=Kd*colorLight*max*(N*L,0);Kd 漫反射系数,colorLight光的颜色,N 单位法向量,L由点指向光源的单位
+	向量.其中N与L点乘，如果结果小于等于0，则漫反射为0
+
+五十六、两种阴影对判断的方法、工作原理
+	本影和半影
+	本影：景物表面上那些没有被光源直接照射的区域（全黑的轮廓分明的区域）。
+	半影：景物表面上那些被某些特定光源直接照射但并非所有特定光源直接照射的区域（半明半暗区域）
+	工作原理：从光源处向物体的所有可见面投射光线，将这些面投影到场景中得到投影面，再将这些投影面与场景中的
+	其他平面求得出阴影多边形，保存这些阴影多边形信息，然后再按视点位置对场景进行相应处理得到所要求的视图（
+	利用空间换时间，每次只需要依据视点位置进行一次阴影计算即可，省去一次消隐过程）
+    
+五十九、Vertex Shader 是什么，怎么计算？
+	顶点着色器是一段执行再GPU上的程序，用来取代fixed pipeline中的transformation和lighting,Vertex shader主要
+	操作顶点。
+	Vertex Shader 对输入顶点完成了从local space 到homogeneous space(齐次空间)的变换过程，homogeneous space 即
+	projection space 的下一个space,在这期间共有 world transformation ,view transfromation 和prohection transfromation 
+	及lighting 几个过程
+
+六十、下列代码在运行过程中会产生几个临时对象
+	string a =new string("abc")
+	a=（a.ToUpper()+"123"）.Substring(0,2)
+	在C#中第一行会报错（Java中倒是可行）
+	应该这样初始化：
+	string b = new string(new char[]{'a','b','c'});
+	答案为：五个临时对象
+
+六十一、下列代码中在运行过程会发生什么问题？如何避免？
+	List<int>ls=new List<int>(new int[]{1,2,3,4,5});
+	foreach(int item in ls){
+		Console.WriteLine(item*item);
+		ls.Remove(item);
+	}
+    产生运行错误，在ls.Remove(item)这行，因为foreach是只读的，不能一边遍历一遍修改
+	
+六十二、Unity3d是否支持写成多线程程序？如果支持的话需要注意什么？
+	仅能从主线程中访问Unity3d的组件，对象和Unity3d系统调用
+	支持：如果同时你要处理很多事情或者与Unity的对象互动小可以用thread,否则使用coroutine.
+	注意：C#中有lock这个关键字，以确保只有一个线程可以在特定的时间内访问特定的对象
+
+六十三：Unity3d的协程和C#线程之间的区别是什么？
+	多线程同时运行在多个线程，而在任一时刻只有一个协程在运行，并且这个同时运行的协同程序只在必要时才被挂起
+	除主线程之外的线程无法访问Unity3d的对象、组件、方法
+	Unity3d没有多线程的概念，不过unity也给我们提供了StartCoroutine(协同程序)和LoadLevelAsync(异步加载关卡)
+	后台加载场景的方法。StartCoroutine为什么叫协同程序呢，所谓协同，就是当你在StartCoroutine的函数体里处理一段
+	代码时，利用yield语句等待执行结果，这期间不影响主线程的继续执行，可以协同工作。
+
+六十四、矩阵相乘的意义以及注意点
+	用于表示线性变换:旋转、缩放、投影、平移、仿射
+	注意矩阵的蠕变：误差的积累
+	
+六十五、请简述什么是DrawCall？并陈述Unity是如何优化的。	
+	1.DrawCall:是对底层图形程序的接口的调用,用来在屏幕上渲染出东西来，在Unity中，每次引擎准备数据并通知GPU的过程称为一次Draw Call。
+	2.优化：Unity中的优化是Batching:分为 static batching 和 dynamic batching
+	static batching 静态批处理,顾名思义，静态的，就是在游戏中不会带动的物体，只要这些物体不动
+	并且拥有相同的材质那么进行批处理，降低调用的次数
+	dynamic batching 动态批处理，这个机制在Unity中自动调用的，只要材质相同，并且满足下面代码的
+	逻辑，就会进行动态的批处理：  
+	for （int i =0;i<100;i++）{
+		GameObject obj=GameObject.Instantiate(prefab) as GameObject;
+	}
+	例如这样是满足的，Unity会自动进行批处理，这段代码的DrawCall 会为1
+	for（int i=0;i<100;i++）{
+		GameObject obj=GameObject.Instantiate(prefab) as GameObject;
+		obj.transform.scale=new Vector3(Random.Range(1,100),1,1);
+	}
+	批处理在每个顶点上会有一定开销，所以顶点数大于900（mesh三角面小于300）也是不会进行批处理的，等等这些限制。
+	所以一般我们尽量使用静态批处理
+    还有打包纹理成图集减少材质的使用
+	减少反光，阴影之类
+	
+	拓展：
+	Draw Call Batching的核心
+	Draw Call Batching的技术合兴就是在可见性的测试之后，检查所有要绘制的物体的材质，把相同的
+	材质分为一个组（一个batch）,然后把它们组合成一个物体（统一变换），这样就可以在一个DrawCall 
+	中处理多个物体了（实际上组合后的一个物体）
+		
+	Draw Call Batching的缺陷
+	但是Draw Call Batching 存在一个缺陷，就是它需要把一个Batch中的所有物体组合到一起，相当于创建了
+	一个与这些物体加起来一样大的物体。
+	与此同事就需要分配相应大小的内存，这不仅会消耗更多的内存，还需要消耗CPU时间
+	特别对于移动的物体，每帧都得重新进行组合
+	但对于禁止的物体来说，只需要进行一次组合，之后就可以一直使用，效率要高得多
+	
+	注意：
+	要有效利用Draw Call Batching，有以下注意点：
+
+	1. 首先是尽量减少场景中使用的材质数量，即尽量共享材质，对于仅纹理不同的材质可以把纹理组合到一张更大的纹理中（称为Texture Atlasing）。
+	2. 然后是把不会移动的物体标记为Static。此外还可以通过CombineChildren脚本（Standard Assets/Scripts/Unity Scripts/CombineChildren）手动把物体组合在一起，但这个脚本会影响可见性测试，因为组合在一起的物体始终会被看作一个物体，从而会增加GPU要处理的几何体数量，因此要小心使用。
+	3. 对于复杂的静态场景，还可以考虑自行设计遮挡剔除算法，减少可见的物体数量同时也可以减少Draw Call。
+	总之，理解Draw Call和Draw Call Batching原理，根据场景特点设计相应的方案来尽量减少Draw Call次数才是王道，其它方面亦然。
+	
+	公式：
+    NVIDIA 在 GDC 曾提出，25K batchs/sec 会吃满 1GHz 的 CPU，100% 的使用率。所以他们推出了一条公式，来预估游戏中大概可以 Run 多少个 Batch：
+	
+六十六 : Shader 
+//SurfaceShader拓展(表面着色器)
+stuct SurfaceOutput
+{
+	fixed3 Albedo; //diffuse color 反射的颜色
+	fixed3 Normal;// tangent space normal,if wirtten 法线贴图
+	fixed3 Emission; //自发光
+	half Specular;// specular power in (0,1) range 镜面反射
+	fixed Gloss; //specular intensity 反射的强度
+	fixed Alpha; //alpha for transparencies 幻灯片的透明度
+}
+
+struct SurfaceOutputStandard
+{
+	fixed3 Albedo; //base (diffuse or specular) color ,Albedo 反射率
+	fixed3 Normal;	//tangent space normal ,if written
+	half3 Emission; 
+	half Metallic; //0=non-metal, 1=metal 金属光泽
+	half Smoothness; //0=rough,1=smooth 光滑程度
+	half Occlusion; //occlusion (default 1) 吸收
+	fixed Alpha; //透明度
+}
+
+struct SurfaceOutputStandardSpecular{
+	fixed3 Albedo;//diffuse color
+	fixed3 Specular;//specular color
+	fixed3 Normal;// tangent space normal if wirtten
+	half3 Emission;
+	half Smoothness;
+	half Occlusion;
+	fixed4 Alpha;
+}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	 
